@@ -1,0 +1,62 @@
+---
+title: "Untitled"
+author: "Kevin Hunt"
+date: "March 29, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+revisions <- do.call(rbind,strsplit(readLines("all_revisions_1000_articles.txt"), "<<sep>>",fixed=T))
+head(revisions)
+
+revisions_processed <- 
+  setNames(
+    as.data.frame(lapply(1:ncol(revisions), function (i) {
+      type.convert(revisions[,i], as.is = TRUE)
+    }), stringsAsFactors = FALSE),
+    c("article_id", "rev_id", "article_title", "timestamp", "[ip:]username", "user_id", "CATEGORY", "IMAGE", "MAIN", "TALK", "USER", "USER_TALK", "OTHER", "EXTERNAL",
+      "TEMPLATE", "COMMENT", "MINOR", "TEXTDATA")
+  )
+
+str(revisions_processed)
+```
+I want to grab all the categories for each article_id
+```{r}
+categories <- revisions_processed %>%
+  group_by(article_id) %>%
+  summarise(CATEGORIES=paste(CATEGORY, collapse = " "))
+head(categories, 10) 
+
+categories$CATEGORIES <- sapply(strsplit(categories$CATEGORIES, split=" "), function(x) {
+  paste0(unique(trimws(x)), collapse = ', ')
+})
+
+
+library(tidyverse)
+categoriesdf <- as.data.frame(str_split_fixed(categories$CATEGORIES, ", ", max(unlist(lapply(strsplit(categories$CATEGORIES, ", "), length)))))
+categoriesdf <- categoriesdf[,-1]
+names(categoriesdf) <- paste0("category_", 1:ncol(categoriesdf))
+categoriesdf <- cbind(article_id = categories$article_id, categoriesdf)
+head(categoriesdf, 10)
+```
+
+Now to tidy it up:
+from wide to long format
+replace empties with NA and filter them out
+```{r}
+df3 <- categoriesdf %>% 
+  gather(category, CATEGORIES, -article_id) %>%
+  replace(. == "", NA) %>%
+  filter(!is.na(CATEGORIES)) %>%
+  select(-category) %>%
+  group_by(CATEGORIES) %>%
+  summarise(number = n()) %>%
+  arrange(desc(number)) 
+head(df3, 10)
+str(df3)
+```
+
