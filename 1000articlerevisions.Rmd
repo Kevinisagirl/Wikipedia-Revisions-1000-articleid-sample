@@ -215,6 +215,12 @@ ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = arti
 
 What's happening with articles that have over 500 revisions
 ```{r}
-ggplot(data = df1_5yrs[df1_5yrs$bins == "500-",], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=bins), size = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Total Article Revisions") + scale_color_hue(direction = 1) + facet_grid(~bins) + theme(legend.position="none")
+factorlevels <- levels(df1_5yrs$bins)
+colorsused <- scales::hue_pal(direction = -1)(length(factorlevels))
+counter <- 1
+for (f in factorlevels){
+  print(ggplot(data = df1_5yrs[df1_5yrs$bins == f,], aes(x=variable, y = value)) + geom_line(aes(group = article_id), color=colorsused[counter], size = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Total Article Revisions") + facet_grid(~bins) + theme(legend.position="none"))
+  counter <- counter +1
+}
 ```
 
