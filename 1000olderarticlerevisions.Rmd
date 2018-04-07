@@ -333,6 +333,7 @@ cat.unique.counts <- categories %>%
   summarize(count = n())
 arrange(cat.unique.counts, desc(count))
 arrange(categories, desc(article_id))
+articles.with.categories <- as.integer(levels(unique(categories$article_id)))
 ```
 
 These are not going to be very helpful. Wikipedia category hierarchy is complex and circular and it is not easy to find root categories.
@@ -384,11 +385,15 @@ deleted.articles <- read.csv("badtitles1000sample.txt")
 deleted.articles <- deleted.articles[,1]
 data.count.indicators$Indicator <- as.character(data.count.indicators$Indicator)
 data.count.indicators[which(data.count.indicators$article_id %in% deleted.articles), "Indicator"] <- "Deleted Article"
+# need to clean article_id 1073 as a bad article. It was not identified as a bad article during the scraping
+data.count.indicators[which(data.count.indicators$article_id == 1073), "Indicator"] <- "Deleted Article"
 data.count.indicators$Indicator <- as.factor(data.count.indicators$Indicator)
 
 ggplot(data = data.count.indicators, aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .7, alpha = 0.5) + geom_point(size = .6)
 
 ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator)),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
+
+ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator) & data.count.indicators$Indicator == "Deleted Article"),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
 ```
 
 # Living people
@@ -401,7 +406,7 @@ living.people.indicator[which(living.people.indicator$article_id %in% living.peo
 library(zoo)
 ggplot(data = living.people.indicator, aes(x=as.yearmon(date), y = count, colour = as.factor(LivingPerson), alpha = 0.5)) + geom_line(aes(group = article_id), alpha=0.5, size = 0.4) + geom_point(size = 1.0)
 
-ggplot(data = living.people.indicator[which(!is.na(living.people.indicator$LivingPerson)),], aes(x=as.yearmon(date), y = count, colour = as.factor(LivingPerson), alpha = 0.5)) + geom_line(aes(group = article_id), alpha=0.5, size = 0.4) + geom_point(size = 1.0)+ geom_dl(aes(label=article_id), method = "top.points")
+ggplot(data = living.people.indicator[which(!is.na(living.people.indicator$LivingPerson)),], aes(x=as.yearmon(date), y = count, alpha = 0.5)) + geom_line(aes(group = article_id), alpha=0.5, size = 0.4) + geom_point(size = 0.8)+ geom_dl(aes(label=article_id), method = "top.points")
 ```
 
 Who is that super popular living person?
@@ -414,5 +419,22 @@ popularpeople <- living.people.indicator %>%
   dplyr::summarize(totalrevisions = sum(count)) %>%
   arrange(desc(totalrevisions))
 popularpeople
+```
+
+Are articles deleted?
+Is there a trend in articles that don't have categories?
+```{r}
+# show articles that don't have categories
+no.categories.articles <- collapsed %>%
+  filter(!article_id %in% articles.with.categories) %>%
+  group_by(article_id) %>%
+  dplyr::summarise(totalrevisions = sum(count))
+
+# how many of these articles were "bad titles"
+(mysteriousarticles <- no.categories.articles %>%
+  filter(!article_id %in% deleted.articles))
+
+# this produces only the article 1073, but looking through browser shows that this article is a "bad title"
+# this was fixed in the above code
 ```
 
