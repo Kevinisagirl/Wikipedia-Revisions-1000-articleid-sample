@@ -94,6 +94,7 @@ ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)
 ```
 
 It could be interesting to look at which articles have such high amounts of revisions.
+
 For now, let's normalize by total number of revisions to get percentages.
 ```{r}
 percents <- collapsed %>%
