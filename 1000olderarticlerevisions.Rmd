@@ -454,9 +454,13 @@ geo.list <- c("Cities", "Townships", "Towns in", "Villages in", "places in", "ci
 for (g in geo.list){
   manually.all.cat.unique.counts[which(all.cat.unique.counts$category %like% g), "manual.category"] <- "Geography"
 }
+manually.all.cat.unique.counts[which(all.cat.unique.counts$category %like% "isambiguation pages"), "manual.category"] <- "Disambiguation pages"
+manually.all.cat.unique.counts[which(all.cat.unique.counts$category %like% "films"), "manual.category"] <- "Films"
 grouped.manually.all.cat.unique.counts <- manually.all.cat.unique.counts %>%
   group_by(manual.category) %>%
   dplyr::summarize(count = sum(count))
 arrange(grouped.manually.all.cat.unique.counts, desc(count))
+
+# maybe some article_id have multiple tags with film in them. have to control for that
 ```
 
