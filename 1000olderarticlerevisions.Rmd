@@ -260,11 +260,11 @@ article_count_by_month <- df1_5yrs %>%
 
 ggplot(data = article_count_by_month, aes(x=as.yearmon(first), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + scale_x_yearmon(format = "%b %Y", n=24, labels = function(x) lapply(strwrap(x, width = 5, simplify = FALSE), paste, collapse="\n")) 
 
-ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + facet_grid(. ~ format(as.yearmon(first), "%Y")) + 
+ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + facet_grid(. ~ format(as.yearmon(first), "%Y"))
 
 article_count_by_quarter <- df1_5yrs %>%
   group_by(quarter) %>%
-  summarise(count = n())
+  dplyr::summarise(count = n())
 
 ggplot(data = article_count_by_quarter, aes(x=quarter, y = count)) + geom_point(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Quarter of First Revision")
 ```
@@ -274,7 +274,7 @@ I want to discretize the number of total revisions
 ```{r}
 data_5yrs_norm$bins <- cut(data_5yrs_norm$totalrevisions, breaks=c(0,2,10,25,100, 500, 20000), labels=c("1-2", "3-10", "10-25", "25-100", "100-500", "500-"))
 
-df1_5yrs <- melt(data_5yrs_norm, c("article_id", "totalrevisions", "bins", "quarter"))
+df1_5yrs <- melt(data_5yrs_norm, c("article_id", "totalrevisions", "bins", "quarter", "first"))
 df1_5yrs$variable <- as.integer(df1_5yrs$variable)
 
 ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=bins, alpha = 0.5), size = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + facet_grid(~bins) +  theme(legend.position="none") + scale_alpha(guide = 'none')
@@ -318,7 +318,7 @@ These are articles that were first revised in October of 2002. Blue is the numbe
 
 ```{r}
 authors <- revisions_processed[which(revisions_processed$article_id %in% articleids.10.2002),] %>%
-  group_by(a) %>%
+  group_by(article_id) %>%
   summarise(count = n(), unique.articles = length(unique(article_id)))
 arrange(collapsed.by.day, desc(count))
 ```
@@ -337,6 +337,7 @@ articles.with.categories <- as.integer(levels(unique(categories$article_id)))
 ```
 
 These are not going to be very helpful. Wikipedia category hierarchy is complex and circular and it is not easy to find root categories.
+We need to pull all article categories and then we can pull all articles in particular high ranking categories like living people vs not living people, technology vs history etc.
 
 # Article Tags
 ```{r}
@@ -436,5 +437,26 @@ no.categories.articles <- collapsed %>%
 
 # this produces only the article 1073, but looking through browser shows that this article is a "bad title"
 # this was fixed in the above code
+```
+```{r}
+allcategories <- as.data.frame(do.call(rbind,strsplit(readLines("Categories_all_oldenough.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
+allcategories <- as.data.frame(allcategories)
+names(allcategories) <- c("article_id", "category")
+all.cat.unique.counts <- allcategories %>%
+  group_by(category) %>%
+  dplyr::summarize(count = n())
+arrange(all.cat.unique.counts, desc(count))
+```
+```{r}
+manually.all.cat.unique.counts <- all.cat.unique.counts
+manually.all.cat.unique.counts$manual.category <- manually.all.cat.unique.counts$category
+geo.list <- c("Cities", "Townships", "Towns in", "Villages in", "places in", "cities", "towns", "Counties", "metropolitan area", "counties", "Municipalities of", "Member states", "Areas of", "metroplex", "Populated places")
+for (g in geo.list){
+  manually.all.cat.unique.counts[which(all.cat.unique.counts$category %like% g), "manual.category"] <- "Geography"
+}
+grouped.manually.all.cat.unique.counts <- manually.all.cat.unique.counts %>%
+  group_by(manual.category) %>%
+  dplyr::summarize(count = sum(count))
+arrange(grouped.manually.all.cat.unique.counts, desc(count))
 ```
 
