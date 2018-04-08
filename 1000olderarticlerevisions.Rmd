@@ -344,7 +344,20 @@ arrange(collapsed.by.day, desc(count))
 library(zoo)
 
 # USE THIS
-ggplot(data = collapsed.by.day, aes(x=as.Date(date))) + geom_line(aes(y = count), color = "blue") + geom_line(aes(y=unique.articles), color = "lightblue")
+ggplot(data = collapsed.by.day, aes(x=as.Date(date))) +
+  geom_line(aes(y = count), color = "blue") +
+  geom_line(aes(y=unique.articles), color = "lightblue") +
+  labs(title = 'Behavior of Articles First Revised in October 2002') +
+  xlab("Days") +
+  ylab("Number of Revisions") +
+  # scale_color_manual(name = "Colors", 
+  #                    values = c("blue" = "blue", "lightblue" = "lightblue"))
+
+
+ggsave("img/articles-first-revised-in-oct-2002.png", 
+       plot = last_plot(),
+       width = 10,
+       height = 6)  
 ```
 These are articles that were first revised in October of 2002. Blue is the number of article revisions by day (each point is a single day). We see there are many revisions shortly after, and then again around 2 years later. There are 337 articles in this dataset that were first revised in Oct of 2002. The black is the number of unique articles revised. When black is as high as blue, the revisions for that date are all on unique articles. When black is lower than blue, there were multiple revisions on single articles for that date. So ~105 of the 337 article first revised on Oct 2002 were also edited around a single time ~ 2 yrs later. 
 
