@@ -403,7 +403,22 @@ data.count.indicators <- merge(tags, collapsed, by="article_id", all = TRUE, sor
 data.count.indicators <- data.count.indicators[!is.na(data.count.indicators$date),]
 arrange(data.count.indicators,article_id)
 
-ggplot(data = data.count.indicators, aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .7, alpha = 0.5) + geom_point(size = .6)
+# USE THIS  
+article.revisions.by.year.date.by.indicator.with.na <- ggplot(data = data.count.indicators, 
+      aes(x=as.yearmon(date), 
+      y = count, colour = Indicator)) + 
+  geom_line(aes(group = article_id), size = .7, alpha = 0.5) +
+  geom_point(size = .6) +
+  labs(title = 'Number of Revisions for Each Article by Month (2001-2008)') +
+  xlab("Year-Month") +
+  ylab("Number of Revisions")
+
+article.revisions.by.year.date.by.indicator.with.na
+
+ggsave("img/article-revisions-by-year-date-by-indicator-with-na.png", 
+       plot = last_plot(),
+       width = 10,
+       height = 6) 
 
 ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator)),], aes(x=as.yearmon(date), y = count, colour = Indicator), size = 0.7, alpha = 0.3) + geom_line(aes(group = article_id), size = .7, alpha = 0.5) + geom_point(size = .6)
 ```
