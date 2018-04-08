@@ -106,8 +106,13 @@ So which are the articles that had many revisions in a single month:
 popular.month.articles <- unique(percents.of.high.revisions$article_id[which(percents.of.high.revisions$percent > .15)])
 popular.articles <- percents.of.high.revisions[which(percents.of.high.revisions$article_id %in% popular.month.articles),]
 library(directlabels)
+
+  
 ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = total)) + geom_line(aes(group = article_id)) + geom_dl(aes(label=article_id), method = "top.points")
+
+
 ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = as.factor(article_id))) + geom_line(aes(group = article_id)) + geom_dl(aes(label=article_id), method = "top.points")
+
 ```
 25431 = Russian language
 60341 = Richmond, California
@@ -416,10 +421,29 @@ data.count.indicators$Indicator <- as.factor(data.count.indicators$Indicator)
 
 ggplot(data = data.count.indicators, aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .7, alpha = 0.5) + geom_point(size = .6)
 
-ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator)),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
 
+# USE THIS 
+article.revisions.by.year.date.by.indicator <- ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator)),],
+  aes(x=as.yearmon(date), 
+      y = count, colour = Indicator)) + 
+  geom_line(aes(group = article_id), 
+      size = .8, 
+      alpha = 0.6) + 
+  geom_point(size = .75) +
+  labs(title = 'Number of Revisions for Each Article by Month (2001-2008)') +
+  xlab("Year-Month") +
+  ylab("Number of Revisions")
+
+ggsave("img/article-revisions-by-year-date-by-indicator.png", 
+       plot = last_plot(),
+       width = 10,
+       height = 6)  
+      
 ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator) & data.count.indicators$Indicator == "Deleted Article"),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
 ```
+
+
+
 
 # Living people
 ```{r}
