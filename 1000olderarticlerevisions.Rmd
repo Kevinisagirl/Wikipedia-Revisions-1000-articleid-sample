@@ -60,8 +60,19 @@ collapsed <- revisions_to_dates %>%
 arrange(collapsed, desc(count))
 
 library(zoo)
-# USE THIS
-ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_point(size = 1.3) + scale_color_gradient2(midpoint = 7000000)
+library(scales)
+article.revisions.by.year.date <- ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)) + 
+  geom_line(aes(group = article_id)) + 
+  geom_point(size = 1.3) + 
+  scale_color_gradient2(midpoint = 7000000, labels=comma) + 
+  labs(title = "Number of Revisions for Each Article by Month from 2001 to 2008", colour = "Article ID") + 
+  xlab("Year-Month") + 
+  ylab("Number of Revisions") +
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+#article.revisions.by.year.date
+
+ggsave("img/article-revisions-by-year-date.png", article.revisions.by.year.date, width = 10, height = 6)
 ```
 
 It could be interesting to look at which articles have such high amounts of revisions.
@@ -88,7 +99,17 @@ popular.articles <- percents.of.high.revisions[which(percents.of.high.revisions$
 library(directlabels)
 # USE THIS - pulled out the three highest articles. add titles to legend remove geom_dl
 ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = total)) + geom_line(aes(group = article_id)) + geom_dl(aes(label=article_id), method = "top.points")
-ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = as.factor(article_id))) + geom_line(aes(group = article_id)) + geom_dl(aes(label=article_id), method = "top.points")
+
+high.revisions.per.month.articles <- ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = as.factor(article_id))) + 
+geom_line(aes(group = article_id)) +
+labs(title = "Articles that Have High Revisions Within A Single Month", colour = "Article ID") + 
+xlab("Year-Month") + 
+ylab("Number of Revisions") +
+theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+#high.revisions.per.month.articles
+
+ggsave("img/high-revisions-per-month-articles.png", high.revisions.per.month.articles,width = 10, height = 6)
 ```
 25431 = Russian language
 60341 = Richmond, California
@@ -102,8 +123,16 @@ highest.collapsed.by.day <- revisions_processed[which(revisions_processed$articl
 arrange(highest.collapsed.by.day, desc(count))
 
 library(zoo)
-# USE THIS
-ggplot(data = highest.collapsed.by.day, aes(x=as.Date(date), y = count, color = as.factor(article_id), alpha = 0.2)) + geom_line() + geom_point(size=0.6)
+high.revisions.per.day.articles <- ggplot(data = highest.collapsed.by.day, aes(x=as.Date(date), y = count, color = as.factor(article_id), alpha = 0.2)) + geom_line() + geom_point(size=0.6) +
+  labs(title = "Articles that Have High Revisions Within A Single Day", colour = "Article ID") + 
+  xlab("Year-Day") + 
+  ylab("Number of Revisions") +
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+high.revisions.per.day.articles
+
+ggsave("img/high-revisions-per-day-articles.png", high.revisions.per.day.articles,width = 10, height = 6)
+
 ```
 On Jan 13, 2007 "Alcibiades" was the wikipedia featured article.
 # USE THIS - add screen shot of google search
