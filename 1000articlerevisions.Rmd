@@ -90,6 +90,7 @@ collapsed <- revisions_to_dates %>%
 arrange(collapsed, desc(count))
 
 library(zoo)
+# USE THIS
 ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_point() 
 ```
 
@@ -102,6 +103,7 @@ percents <- collapsed %>%
   mutate(percent = count/sum(count))
 
 library(zoo)
+# USE THIS
 ggplot(data = percents, aes(x=as.yearmon(date), y = percent, colour = article_id)) + geom_line(aes(group = article_id)) + geom_point() 
 ```
 Plot this with first revision to get plot to prove our point about article ids and article age.
@@ -110,13 +112,15 @@ Looks like articles that were created after 2006, might not have had time to sho
 ```{r}
 # this won't work if the data isn't sorted by date
 # date of first revision for each article id
+
+# USE THIS - prepare background slide for why we cut off all 2003
 t.first <- percents[!duplicated(percents$article_id),]
 arrange(t.first, desc(date))
 t.first.before2003 <- subset(t.first, as.yearmon(date) < as.yearmon("2003-01"))
 arrange(t.first.before2003, desc(date))
 ```
 
-So now we know which article_id's were created before 2006.
+So now we know which article_id's were created before 2003.
 We need to subset the data for these article_ids
 ```{r}
 filtered_revisions <- percents[percents$article_id %in% t.first.before2003$article_id, ]
