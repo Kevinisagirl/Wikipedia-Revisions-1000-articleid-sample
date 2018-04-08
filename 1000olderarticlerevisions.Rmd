@@ -38,7 +38,7 @@ write(article.ids, file = "1000articleids.txt")
 
 ## Date work
 Separate the date, create monthly counts
-```{r}
+```{r, results="hide"}
 date_split <- separate(data = revisions_processed, col = date, into = c('year', 'month', 'day'), sep = "-")
 monthlycounts <- date_split %>%
   group_by(article_id, year, month) %>%
@@ -342,6 +342,8 @@ collapsed.by.day <- revisions_processed[which(revisions_processed$article_id %in
 arrange(collapsed.by.day, desc(count))
 
 library(zoo)
+
+# USE THIS
 ggplot(data = collapsed.by.day, aes(x=as.Date(date))) + geom_line(aes(y = count), color = "blue") + geom_line(aes(y=unique.articles), color = "lightblue")
 ```
 These are articles that were first revised in October of 2002. Blue is the number of article revisions by day (each point is a single day). We see there are many revisions shortly after, and then again around 2 years later. There are 337 articles in this dataset that were first revised in Oct of 2002. The black is the number of unique articles revised. When black is as high as blue, the revisions for that date are all on unique articles. When black is lower than blue, there were multiple revisions on single articles for that date. So ~105 of the 337 article first revised on Oct 2002 were also edited around a single time ~ 2 yrs later. 
@@ -398,10 +400,13 @@ ggplot(data = data.with.indicators.drop.oct.2002[which(!is.na(data.with.indicato
 ```
 
 Nothing really pops out with percentages. Show this with counts instead.
-```{r}
+```{r, results="hide"}
 data.count.indicators <- merge(tags, collapsed, by="article_id", all = TRUE, sort = FALSE)
 data.count.indicators <- data.count.indicators[!is.na(data.count.indicators$date),]
 arrange(data.count.indicators,article_id)
+```
+
+```{r}
 
 # USE THIS  
 article.revisions.by.year.date.by.indicator.with.na <- ggplot(data = data.count.indicators, 
@@ -502,7 +507,7 @@ no.categories.articles <- collapsed %>%
 # this produces only the article 1073, but looking through browser shows that this article is a "bad title"
 # this was fixed in the above code
 ```
-```{r}
+```{r, results="hide"}
 allcategories <- as.data.frame(do.call(rbind,strsplit(readLines("Categories_all_oldenough.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
 allcategories <- as.data.frame(allcategories)
 names(allcategories) <- c("article_id", "category")
