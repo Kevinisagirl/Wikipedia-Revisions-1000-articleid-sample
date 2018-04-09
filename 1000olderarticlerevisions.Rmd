@@ -312,7 +312,17 @@ Let's explore articles from the last quarter
 ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_colour_manual(name = "quarter", values = colorsusedquarters) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
 
 # USE THIS
-ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Month of First Revision") + scale_alpha(guide = 'none')
+percent.revision.since.created.last.quarter <- ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + 
+  geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + 
+  ylab("Percent of Article Revisions") + 
+  xlab("Months since First Revision") + 
+  labs(title = "Percent of Articles by Month Since Created (Last Quarter)", color = "Quarter") + 
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+percent.revision.since.created.last.quarter
+ggsave("img/percent-revision-since-created-last-quarter.png", percent.revision.since.created.last.quarter,width = 10, height = 6)
+
+
 
 ggplot(data = df1_5yrs[which(df1_5yrs$first %in% c("2002-09", "2002-10", "2002-11", "2002-12")),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Month of First Revision") + scale_alpha(guide = 'none') + facet_grid(~as.factor(first))
 ```
@@ -325,7 +335,19 @@ article_count_by_month <- df1_5yrs %>%
 ggplot(data = article_count_by_month, aes(x=as.yearmon(first), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + scale_x_yearmon(format = "%b %Y", n=24, labels = function(x) lapply(strwrap(x, width = 5, simplify = FALSE), paste, collapse="\n")) 
 
 # USE THIS but fix x-axis
-ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + facet_grid(. ~ format(as.yearmon(first), "%Y")) + scale_x_discrete(breaks=c(1:12))
+first.article.revisions.by.year.month <- ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + 
+  geom_line(size = 0.5) + 
+  ylab("Number of Articles First Revised") + 
+  xlab("Date of First Revision") + 
+  facet_grid(. ~ format(as.yearmon(first), "%Y")) + 
+  scale_x_discrete(breaks=c(1:12))+
+  labs(title = "Number of First Article Revisions by Month", color = "Quarter") + 
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+first.article.revisions.by.year.month
+ggsave("img/first-article-revisions-by-year-month.png", first.article.revisions.by.year.month,width = 10, height = 6)
+
+
 
 article_count_by_quarter <- df1_5yrs %>%
   group_by(quarter) %>%
