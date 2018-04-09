@@ -61,6 +61,8 @@ collapsed <- revisions_to_dates %>%
 arrange(collapsed, desc(count))
 
 library(zoo)
+
+article.revisions.by.year.date <- ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)) + 
 geom_line(aes(group = article_id)) + 
 geom_point(size = 1.3) + 
 scale_color_gradient2(midpoint = 7000000, labels=comma) + 
@@ -70,7 +72,7 @@ ylab("Number of Revisions") +
 theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
 
 
-#article.revisions.by.year.date
+article.revisions.by.year.date
 
 ggsave("img/article-revisions-by-year-date.png", article.revisions.by.year.date, width = 10, height = 6)
 
