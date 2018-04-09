@@ -307,10 +307,57 @@ data_5yrs_norm$bins <- cut(data_5yrs_norm$totalrevisions, breaks=c(0,2,10,25,100
 df1_5yrs <- melt(data_5yrs_norm, c("article_id", "totalrevisions", "bins", "quarter", "first"))
 df1_5yrs$variable <- as.integer(df1_5yrs$variable)
 
-ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=bins, alpha = 0.5), size = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + facet_grid(~bins) +  theme(legend.position="none") + scale_alpha(guide = 'none')
+# USE THIS
+ggplot(data = df1_5yrs, aes(x=variable, y = value)) + 
+  geom_line(aes(group = article_id, 
+                color=bins, 
+                alpha = 0.2), 
+            size = 0.5) + 
+  scale_y_continuous(labels = scales::percent) + 
+  ylab("Percent of Article Revisions") + 
+  xlab("Months Since First Revision") + 
+  scale_color_hue(direction = -1) + 
+  facet_grid(~bins) +  
+  theme(legend.position="none") + 
+  scale_alpha(guide = 'none') + 
+  ggtitle("Articles By Total Revisions")
 
-ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=bins, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + labs(color = "Total Article Revisions")
+ggsave("img/articles-by-total-revisions-facet.png", 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 ```
+
+```{r}
+ggplot(data = df1_5yrs, aes(x=variable, y = value)) + 
+  geom_line(aes(group = article_id, color=bins, alpha = 0.8), size = 0.8) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + 
+  xlab("Months since First Revision") + scale_color_hue(direction = -1) + labs(color = "Total Article Revisions") 
+# + scale_alpha(guide = "none")
+
+```
+
+```{r}
+# USE THIS
+ggplot(data = df1_5yrs, aes(x=variable, y = value)) + 
+  geom_line(aes(group = article_id, 
+                color=bins, 
+                alpha = 0.2), 
+            size = 0.2) + 
+  scale_y_continuous(labels = scales::percent) + 
+  ylab("Percent of Article Revisions") + 
+  xlab("Months Since First Revision") + 
+  scale_color_hue(direction = -1) + 
+  labs(color = "Total Article Revisions") +
+  scale_alpha(guide = 'none') +
+  ggtitle("Total Article Revisions Normalized by First Revision Date")
+
+ggsave("img/articles-by-total-revisions-normalized-by-first-revision.png", 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+```
+
 
 
 ```{r}
@@ -334,30 +381,37 @@ articleids.10.2002 <- unique(articles.10.2002$article_id)
 ```
 
 
-```{r}
-
+```{r, results="hide"}
 collapsed.by.day <- revisions_processed[which(revisions_processed$article_id %in% articleids.10.2002),] %>%
+  mutate(date = as.Date(date)) %>% 
   group_by(date) %>%
-  summarise(count = n(), unique.articles = length(unique(article_id)))
+  dplyr::summarise(count = n(), unique.articles = length(unique(article_id)))
 arrange(collapsed.by.day, desc(count))
+```
 
+```{r}
 library(zoo)
 
-# USE THIS
-ggplot(data = collapsed.by.day, aes(x=as.Date(date))) +
-  geom_line(aes(y = count), color = "blue") +
-  geom_line(aes(y=unique.articles), color = "lightblue") +
-  labs(title = 'Behavior of Articles First Revised in October 2002') +
-  xlab("Days") +
-  ylab("Number of Revisions") +
-  # scale_color_manual(name = "Colors", 
-  #                    values = c("blue" = "blue", "lightblue" = "lightblue"))
+molten.collapsed.by.day <- melt(collapsed.by.day, 
+                     variable.name = "type",
+                     value.names = "value",
+                     id.vars = c("date"))
 
+
+# USE THIS  
+ggplot(data = molten.collapsed.by.day,
+       aes(x=date, y=value, colour = type)) +
+  geom_line()+
+  labs(title = 'Behavior of Articles First Revised in October 2002',
+       colour= 'Article Type') +
+   xlab("Days") +
+   ylab("Number of Revisions") +
+  scale_color_manual(labels = c("Article Revisions", "Unique Article Revisions"), values = c("blue", "lightblue"))
 
 ggsave("img/articles-first-revised-in-oct-2002.png", 
        plot = last_plot(),
        width = 10,
-       height = 6)  
+       height = 6)
 ```
 These are articles that were first revised in October of 2002. Blue is the number of article revisions by day (each point is a single day). We see there are many revisions shortly after, and then again around 2 years later. There are 337 articles in this dataset that were first revised in Oct of 2002. The black is the number of unique articles revised. When black is as high as blue, the revisions for that date are all on unique articles. When black is lower than blue, there were multiple revisions on single articles for that date. So ~105 of the 337 article first revised on Oct 2002 were also edited around a single time ~ 2 yrs later. 
 
@@ -448,9 +502,9 @@ Let's look at which articles have been deleted.
 deleted.articles <- read.csv("badtitles1000sample.txt")
 deleted.articles <- deleted.articles[,1]
 data.count.indicators$Indicator <- as.character(data.count.indicators$Indicator)
-data.count.indicators[which(data.count.indicators$article_id %in% deleted.articles), "Indicator"] <- "Deleted Article"
+data.count.indicators[which(data.count.indicators$article_id %in% deleted.articles), "Indicator"] <- "Deleted Article IDs"
 # need to clean article_id 1073 as a bad article. It was not identified as a bad article during the scraping
-data.count.indicators[which(data.count.indicators$article_id == 1073), "Indicator"] <- "Deleted Article"
+data.count.indicators[which(data.count.indicators$article_id == 1073), "Indicator"] <- "Deleted Article IDs"
 data.count.indicators$Indicator <- as.factor(data.count.indicators$Indicator)
 
 ggplot(data = data.count.indicators, aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .7, alpha = 0.5) + geom_point(size = .6)
@@ -473,7 +527,7 @@ ggsave("img/article-revisions-by-year-date-by-indicator.png",
        width = 10,
        height = 6)  
       
-ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator) & data.count.indicators$Indicator == "Deleted Article"),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
+ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator) & data.count.indicators$Indicator == "Deleted Article IDs"),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
 ```
 
 
