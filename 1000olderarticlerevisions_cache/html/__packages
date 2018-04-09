@@ -1,0 +1,11 @@
+base
+ggplot2
+dplyr
+tidyr
+bindrcpp
+zoo
+directlabels
+scales
+data.table
+reshape2
+ggvis
