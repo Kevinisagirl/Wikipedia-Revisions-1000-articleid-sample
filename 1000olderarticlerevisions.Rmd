@@ -61,28 +61,19 @@ collapsed <- revisions_to_dates %>%
 arrange(collapsed, desc(count))
 
 library(zoo)
-# p <-  ggplot(data = collapsed, 
-#        aes(x=as.yearmon(date), y = count, colour = article_id)) +       
-#       geom_line(aes(group = article_id)) + 
-#       geom_point(size = 1.3) + 
-#       scale_color_gradient2(midpoint = 7000000, labels=comma) +
-      
-      # scale_fill_continuous(label=comma)
-  
-  
-p <- ggplot(data = collapsed, 
-       aes(x=as.yearmon(date), y = count, colour = article_id)) + 
-  geom_line(aes(group = article_id)) + 
-  geom_point(size = 1.3) + 
-  scale_color_gradient2(midpoint = 7000000, labels=comma) + 
-  labs(title = "Number of Revisions for Each Article by Month from 2001 to 2008", colour = "Article ID") + 
-  xlab("Year-Month") + 
-  ylab("Number of Revisions") +
-  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+geom_line(aes(group = article_id)) + 
+geom_point(size = 1.3) + 
+scale_color_gradient2(midpoint = 7000000, labels=comma) + 
+labs(title = "Number of Revisions for Each Article by Month from 2001 to 2008", colour = "Article ID") + 
+xlab("Year-Month") + 
+ylab("Number of Revisions") +
+theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
 
-p
 
-ggsave("img/article-revisions-by-year-date.png", p)
+#article.revisions.by.year.date
+
+ggsave("img/article-revisions-by-year-date.png", article.revisions.by.year.date, width = 10, height = 6)
+
 ```
 
 It could be interesting to look at which articles have such high amounts of revisions.
@@ -108,11 +99,19 @@ popular.month.articles <- unique(percents.of.high.revisions$article_id[which(per
 popular.articles <- percents.of.high.revisions[which(percents.of.high.revisions$article_id %in% popular.month.articles),]
 library(directlabels)
 
-  
+# USE THIS - pulled out the three highest articles. add titles to legend remove geom_dl
 ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = total)) + geom_line(aes(group = article_id)) + geom_dl(aes(label=article_id), method = "top.points")
 
+high.revisions.per.month.articles <- ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = as.factor(article_id))) + 
+geom_line(aes(group = article_id)) +
+labs(title = "Articles that Have High Revisions Within A Single Month", colour = "Article ID") + 
+xlab("Year-Month") + 
+ylab("Number of Revisions") +
+theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
 
-ggplot(data = popular.articles, aes(x=as.yearmon(date), y = count, colour = as.factor(article_id))) + geom_line(aes(group = article_id)) + geom_dl(aes(label=article_id), method = "top.points")
+#high.revisions.per.month.articles
+
+ggsave("img/high-revisions-per-month-articles.png", high.revisions.per.month.articles,width = 10, height = 6)
 
 ```
 25431 = Russian language
@@ -127,9 +126,19 @@ highest.collapsed.by.day <- revisions_processed[which(revisions_processed$articl
 arrange(highest.collapsed.by.day, desc(count))
 
 library(zoo)
-ggplot(data = highest.collapsed.by.day, aes(x=as.Date(date), y = count, color = as.factor(article_id), alpha = 0.2)) + geom_line() + geom_point(size=0.6)
+high.revisions.per.day.articles <- ggplot(data = highest.collapsed.by.day, aes(x=as.Date(date), y = count, color = as.factor(article_id), alpha = 0.2)) + geom_line() + geom_point(size=0.6) +
+  labs(title = "Articles that Have High Revisions Within A Single Day", colour = "Article ID") + 
+  xlab("Year-Day") + 
+  ylab("Number of Revisions") +
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+high.revisions.per.day.articles
+
+ggsave("img/high-revisions-per-day-articles.png", high.revisions.per.day.articles,width = 10, height = 6)
+
 ```
 On Jan 13, 2007 "Alcibiades" was the wikipedia featured article.
+# USE THIS - add screen shot of google search
 Many of the edits of "Alcibiades" were done by one author Yannismarou (went on to become an administrator in 2007). Writes tips for how to make a featured article.
 
 Can't tie Russian language to any news and the history for the article doesn't go back as far as this date.
@@ -258,11 +267,38 @@ group.colors <- c("2001.1" = colorsusedquarters[1], "2001.2" = colorsusedquarter
                   "2001.2" = colorsusedquarters[6], "2001.3" = colorsusedquarters[7], "2001.4" = colorsusedquarters[8])
 
 ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=as.factor(quarter), alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + facet_grid(~as.factor(quarter)) +  theme(legend.position="none")
+```
 
-ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.6), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
+```{r}
+# USE THIS
+percent.revision.since.created <- ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.6), size = 0.2) + scale_y_continuous(labels = scales::percent) + 
+  ylab("Percent of Article Revisions") + 
+  xlab("Months since First Revision") + 
+  scale_color_hue(direction = -1) + 
+  scale_colour_manual(name = "Quarter", values = colorsusedquarters) + 
+  labs(title = "Percent of Articles by Month Since Created", color = "Fiscal Quarter of First Revision") + 
+  scale_alpha(guide = 'none')+
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
 
-ggplot(data = df1_5yrs[which(df1_5yrs$quarter != "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.6), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_colour_manual(name = "quarter", values = colorsusedquarters) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
+percent.revision.since.created
 
+ggsave("img/percent-revision-since-created.png", percent.revision.since.created,width = 10, height = 6)
+
+# USE THIS
+percent.revision.since.created.no.200204 <- ggplot(data = df1_5yrs[which(df1_5yrs$quarter != "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.6), size = 0.2) + scale_y_continuous(labels = scales::percent) + 
+  ylab("Percent of Article Revisions") + 
+  xlab("Months since First Revision") + 
+  scale_colour_manual(name = "Quarter", values = colorsusedquarters) + 
+  labs(title = "Percent of Articles by Month Since Created (Without 2002.4)", color = "Fiscal Quarter of First Revision") + 
+  scale_alpha(guide = 'none')+
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+percent.revision.since.created.no.200204
+ggsave("img/percent-revision-since-created-no-200204.png", percent.revision.since.created.no.200204,width = 10, height = 6)
+
+```
+
+```{r}
 ggplot(data = df1_5yrs[which(!df1_5yrs$quarter %in% c("2002.4","2002.3")),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_colour_manual(name = "quarter", values = colorsusedquarters) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
 
 ggplot(data = df1_5yrs[which(!df1_5yrs$quarter %in% c("2002.4","2002.3", "2002.2")),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_colour_manual(name = "quarter", values = colorsusedquarters) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
@@ -278,7 +314,18 @@ Let's explore articles from the last quarter
 ```{r}
 ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_colour_manual(name = "quarter", values = colorsusedquarters) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
 
-ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Month of First Revision") + scale_alpha(guide = 'none')
+# USE THIS
+percent.revision.since.created.last.quarter <- ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + 
+  geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + 
+  ylab("Percent of Article Revisions") + 
+  xlab("Months since First Revision") + 
+  labs(title = "Percent of Articles by Month Since Created (Last Quarter)", color = "Quarter") + 
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+percent.revision.since.created.last.quarter
+ggsave("img/percent-revision-since-created-last-quarter.png", percent.revision.since.created.last.quarter,width = 10, height = 6)
+
+
 
 ggplot(data = df1_5yrs[which(df1_5yrs$first %in% c("2002-09", "2002-10", "2002-11", "2002-12")),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Month of First Revision") + scale_alpha(guide = 'none') + facet_grid(~as.factor(first))
 ```
@@ -290,11 +337,25 @@ article_count_by_month <- df1_5yrs %>%
 
 ggplot(data = article_count_by_month, aes(x=as.yearmon(first), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + scale_x_yearmon(format = "%b %Y", n=24, labels = function(x) lapply(strwrap(x, width = 5, simplify = FALSE), paste, collapse="\n")) 
 
-ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + facet_grid(. ~ format(as.yearmon(first), "%Y"))
+# USE THIS but fix x-axis
+first.article.revisions.by.year.month <- ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + 
+  geom_line(size = 0.5) + 
+  ylab("Number of Articles First Revised") + 
+  xlab("Date of First Revision") + 
+  facet_grid(. ~ format(as.yearmon(first), "%Y")) + 
+  scale_x_discrete(breaks=c(1:12))+
+  labs(title = "Number of First Article Revisions by Month", color = "Quarter") + 
+  theme(plot.title = element_text(size = rel(1.3)), axis.ticks.length = unit(.25, "cm"))
+
+first.article.revisions.by.year.month
+ggsave("img/first-article-revisions-by-year-month.png", first.article.revisions.by.year.month,width = 10, height = 6)
+
+
 
 article_count_by_quarter <- df1_5yrs %>%
   group_by(quarter) %>%
   dplyr::summarise(count = n())
+
 
 ggplot(data = article_count_by_quarter, aes(x=quarter, y = count)) + geom_point(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Quarter of First Revision")
 ```
@@ -308,6 +369,7 @@ df1_5yrs <- melt(data_5yrs_norm, c("article_id", "totalrevisions", "bins", "quar
 df1_5yrs$variable <- as.integer(df1_5yrs$variable)
 
 # USE THIS
+
 ggplot(data = df1_5yrs, aes(x=variable, y = value)) + 
   geom_line(aes(group = article_id, 
                 color=bins, 
@@ -326,6 +388,7 @@ ggsave("img/articles-by-total-revisions-facet.png",
        plot = last_plot(),
        width = 10,
        height = 6)
+
 ```
 
 ```{r}
@@ -377,7 +440,12 @@ Strong peak around 26 months for 10-25 revisions and can still see it for articl
 ```{r}
 articles.10.2002 <- aligned_revisions[which(first == "2002-10")] 
 articleids.10.2002 <- unique(articles.10.2002$article_id)
+
+# USE THIS - screenshot
 (article.names.10.2002 <- unique(revisions_processed$article_title[which(revisions_processed$article_id %in% articleids.10.2002)]))
+
+
+# Lydia's google searching identifies Rambot, created by RamMan
 ```
 
 
@@ -387,10 +455,13 @@ collapsed.by.day <- revisions_processed[which(revisions_processed$article_id %in
   group_by(date) %>%
   dplyr::summarise(count = n(), unique.articles = length(unique(article_id)))
 arrange(collapsed.by.day, desc(count))
+
 ```
+
 
 ```{r}
 library(zoo)
+
 
 molten.collapsed.by.day <- melt(collapsed.by.day, 
                      variable.name = "type",
@@ -412,17 +483,24 @@ ggsave("img/articles-first-revised-in-oct-2002.png",
        plot = last_plot(),
        width = 10,
        height = 6)
+
+# Add Lydia's discovery of KevinBot
+
 ```
 These are articles that were first revised in October of 2002. Blue is the number of article revisions by day (each point is a single day). We see there are many revisions shortly after, and then again around 2 years later. There are 337 articles in this dataset that were first revised in Oct of 2002. The black is the number of unique articles revised. When black is as high as blue, the revisions for that date are all on unique articles. When black is lower than blue, there were multiple revisions on single articles for that date. So ~105 of the 337 article first revised on Oct 2002 were also edited around a single time ~ 2 yrs later. 
 
 ```{r}
-authors <- revisions_processed[which(revisions_processed$article_id %in% articleids.10.2002),] %>%
-  group_by(article_id) %>%
-  summarise(count = n(), unique.articles = length(unique(article_id)))
 arrange(collapsed.by.day, desc(count))
+
+authors.question <- revisions_processed[which(revisions_processed$article_id %in% articleids.10.2002),] %>%
+  group_by(article_id) %>%
+  dplyr::summarise(count = n(), unique.articles = length(unique(article_id)), proportion = count/unique.articles)
+
+arrange(authors.question, desc(count))
 ```
 
 ## categories
+
 ```{r}
 categories <- do.call(rbind,strsplit(readLines("1000categories.txt"), "\x1e"))
 categories <- as.data.frame(categories)
@@ -473,6 +551,7 @@ data.count.indicators <- data.count.indicators[!is.na(data.count.indicators$date
 arrange(data.count.indicators,article_id)
 ```
 
+
 ```{r}
 
 # USE THIS  
@@ -491,6 +570,7 @@ ggsave("img/article-revisions-by-year-date-by-indicator-with-na.png",
        plot = last_plot(),
        width = 10,
        height = 6) 
+
 
 ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator)),], aes(x=as.yearmon(date), y = count, colour = Indicator), size = 0.7, alpha = 0.3) + geom_line(aes(group = article_id), size = .7, alpha = 0.5) + geom_point(size = .6)
 ```
@@ -527,6 +607,7 @@ ggsave("img/article-revisions-by-year-date-by-indicator.png",
        width = 10,
        height = 6)  
       
+
 ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator) & data.count.indicators$Indicator == "Deleted Article IDs"),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
 ```
 
@@ -535,6 +616,7 @@ ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator
 
 # Living people
 ```{r}
+# we are interested in doing this again on the complete old enough articles!!
 living.people.article.ids <- unique(as.character(categories[which(categories$category == "Living people"), "article_id"]))
 
 living.people.indicator <- collapsed
