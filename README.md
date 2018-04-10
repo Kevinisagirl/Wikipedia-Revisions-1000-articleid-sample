@@ -24,4 +24,4 @@ subsample of 1000 older article ids - `1000olderrevisons.rmd`
 # Presentation 
 
 See slides here:  
-https://docs.google.com/presentation/d/1LYECSEUcr-U4f8_LEu3NOtIeOdiGqwZKGR-7UpIUO58/edit
+https://docs.google.com/presentation/d/1LYECSEUcr-U4f8_LEu3NOtIeOdiGqwZKGR-7UpIUO58/edit?usp=sharing
