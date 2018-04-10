@@ -12,6 +12,9 @@ SNAP (Stanford) compressed zip file with all of Wikipedia's revisions from its i
 * Generate a list of unique article_ids  
 * Aggregate attributes associated with each article_id  
 
+# Web Scraping Wikipedia for Indicators  
+See `/wikiscraper` folder  
+
 # Analysis  
 See this repo:  
 initial random subsample of 1000 article ids - `1000revisions.rmd`
