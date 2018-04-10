@@ -397,6 +397,11 @@ Let's explore articles from the last quarter
 ```{r}
 ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=quarter, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_colour_manual(name = "quarter", values = colorsusedquarters) + labs(color = "Fiscal Quarter of First Revision") + scale_alpha(guide = 'none')
 
+ggsave('img-older/last-quarter-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 # USE THIS
 percent.revision.since.created.last.quarter <- ggplot(data = df1_5yrs[which(df1_5yrs$quarter == "2002.4"),], aes(x=variable, y = value)) + 
   geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + 
@@ -411,14 +416,24 @@ ggsave("img/percent-revision-since-created-last-quarter.png", percent.revision.s
 
 
 ggplot(data = df1_5yrs[which(df1_5yrs$first %in% c("2002-09", "2002-10", "2002-11", "2002-12")),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=first, alpha = 0.2), size = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + labs(color = "Month of First Revision") + scale_alpha(guide = 'none') + facet_grid(~as.factor(first))
+
+ggsave('img-older/last-quarter-2002-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ```
 I want to know how many articles are produced per month, and per quarter
 ```{r}
 article_count_by_month <- df1_5yrs %>%
-  group_by(first) %>%
-  summarise(count = n())
+  dplyr::group_by(first) %>%
+  dplyr::summarise(count = n())
 
 ggplot(data = article_count_by_month, aes(x=as.yearmon(first), y = count)) + geom_line(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Date of First Revision") + scale_x_yearmon(format = "%b %Y", n=24, labels = function(x) lapply(strwrap(x, width = 5, simplify = FALSE), paste, collapse="\n")) 
+ggsave('img-older/articles-per-month-per-quarter-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 
 # USE THIS but fix x-axis
 first.article.revisions.by.year.month <- ggplot(data = article_count_by_month, aes(x=as.integer(format(as.yearmon(first), "%m")), y = count)) + 
@@ -441,6 +456,10 @@ article_count_by_quarter <- df1_5yrs %>%
 
 
 ggplot(data = article_count_by_quarter, aes(x=quarter, y = count)) + geom_point(size = 0.5) + ylab("Number of Articles First Revised") + xlab("Quarter of First Revision")
+ggsave('img-older/article-count-by-quarter-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 ```
 
 ## Coloring by number of revisions
@@ -480,6 +499,11 @@ ggplot(data = df1_5yrs, aes(x=variable, y = value)) +
   xlab("Months since First Revision") + scale_color_hue(direction = -1) + labs(color = "Total Article Revisions") 
 # + scale_alpha(guide = "none")
 
+ggsave('img-older/monts-since-first-revision-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ```
 
 ```{r}
@@ -512,7 +536,21 @@ colorsused <- scales::hue_pal(direction = -1)(length(factorlevels))
 counter <- 1
 for (f in factorlevels){
   print(ggplot(data = df1_5yrs[df1_5yrs$bins == f,], aes(x=variable, y = value)) + geom_line(aes(group = article_id), color=colorsused[counter], size = 0.6, alpha = 0.5) + scale_y_continuous(labels = scales::percent, limits = c(0,1)) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + facet_grid(~bins) + theme(legend.position="none") )
+  
+  ggsave(paste0('img-older/', 'months-since-first-revision-facet-', f, 'sample2.png'), 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+  
   print(ggplot(data = df1_5yrs[df1_5yrs$bins == f,], aes(x=variable, y = value)) + geom_line(aes(group = article_id), color=colorsused[counter], size = 0.6, alpha = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + facet_grid(~bins) + theme(legend.position="none") )
+  
+    ggsave(paste0('img-older/', 'months-since-first-revision-facet-scaled-', f, 'sample2.png'), 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+  
+  
+  
   counter <- counter +1
 }
 ```
