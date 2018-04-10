@@ -652,8 +652,17 @@ arrange(tags, article_id)
 data.with.indicators <- merge(tags, df1_5yrs, by='article_id', all=TRUE, sort=FALSE)
 data.with.indicators <- data.with.indicators[!is.na(data.with.indicators$first),]
 arrange(data.with.indicators,article_id,quarter)
+
+
 # Plot percents by tags
 ggplot(data = data.with.indicators, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=Indicator), size = 0.4, alpha = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision")
+
+ggsave('img-older/percents-by-tags.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+
 ```
 ```{r}
 # let's hide the articles that were first created in Oct 2002
@@ -662,7 +671,17 @@ data.with.indicators.drop.oct.2002 <- data.with.indicators[which(data.with.indic
 # Plot percents by tags
 ggplot(data = data.with.indicators.drop.oct.2002, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=Indicator), size = 0.4, alpha = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision")
 
+ggsave('img-older/percents-by-tags-without-oct2002.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ggplot(data = data.with.indicators.drop.oct.2002[which(!is.na(data.with.indicators.drop.oct.2002$Indicator)),], aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=Indicator), size = .5, alpha = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision")
+
+ggsave('img-older/percents-by-tags-without-oct2002-without-nas.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 ```
 
 Nothing really pops out with percentages. Show this with counts instead.
@@ -742,6 +761,11 @@ ggsave("img/article-revisions-by-year-date-by-indicator.png",
       
 
 ggplot(data = data.count.indicators[which(!is.na(data.count.indicators$Indicator) & data.count.indicators$Indicator == "Deleted Article IDs"),], aes(x=as.yearmon(date), y = count, colour = Indicator)) + geom_line(aes(group = article_id), size = .8, alpha = 0.6) + geom_point(size = .75)
+
+ggsave('img-older/article-revisions-by-year-deleted-articleids.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 ```
 
 
@@ -755,10 +779,21 @@ living.people.article.ids <- unique(as.character(categories[which(categories$cat
 living.people.indicator <- collapsed
 living.people.indicator$LivingPerson <- NA
 living.people.indicator[which(living.people.indicator$article_id %in% living.people.article.ids), "LivingPerson"] <- "Living People"
+
 library(zoo)
+
 ggplot(data = living.people.indicator, aes(x=as.yearmon(date), y = count, colour = as.factor(LivingPerson), alpha = 0.5)) + geom_line(aes(group = article_id), alpha=0.5, size = 0.4) + geom_point(size = 1.0)
+ggsave('img-older/living-people-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 
 ggplot(data = living.people.indicator[which(!is.na(living.people.indicator$LivingPerson)),], aes(x=as.yearmon(date), y = count, alpha = 0.5)) + geom_line(aes(group = article_id), alpha=0.5, size = 0.4) + geom_point(size = 0.8)+ geom_dl(aes(label=article_id), method = "top.points")
+
+ggsave('img-older/living-people-top-points-sample2.png', 
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 ```
 
 Who is that super popular living person?
