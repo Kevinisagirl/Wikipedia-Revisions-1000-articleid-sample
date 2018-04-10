@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
+library(scales)
 ```
 
 load in the data and convert to a data frame
@@ -159,8 +160,23 @@ We need to subset the data for these article_ids
 ```{r}
 filtered_revisions <- percents[percents$article_id %in% t.first.before2003$article_id, ]
 arrange(filtered_revisions, article_id)
+
 ggplot(data = filtered_revisions, aes(x=as.yearmon(date), y = percent, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + geom_point()
+
+ggsave('img-other/articles-normalized-by-total-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+
 ggplot(data = filtered_revisions, aes(x=as.yearmon(date), y = percent, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + ylim(0,.5) + geom_point()
+
+ggsave('img-other/articles-normalized-by-total-truncated-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+
 ```
 
 Convert records to time since first revision
@@ -171,6 +187,12 @@ aligned_revisions$time.since.creation <- (as.yearmon(aligned_revisions$date) - a
 aligned_revisions$time.since.creation <- as.integer(round(aligned_revisions$time.since.creation))
 library(scales)
 ggplot(data = aligned_revisions, aes(x=time.since.creation/12, y = percent, colour = article_id)) + geom_line(aes(group = article_id)) + scale_y_continuous(labels = scales::percent) + geom_point()
+
+ggsave('img-other/articles-time-since-first-creation-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ```
 
 Okay so there might be some trends that are obfuscated because we do not have 0% for months where there are no edits.
@@ -187,6 +209,12 @@ df1 <- melt(all_months, "article_id")
 df1$variable <- as.integer(df1$variable)
 
 ggplot(data = df1, aes(x=variable, y = value, colour = article_id)) + geom_line(aes(group = article_id)) + scale_y_continuous(labels = scales::percent) + geom_point()
+
+ggsave('img-other/articles-normalized-by-total-melted-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ```
 
 Okay so we could use a plot to show why we are throwing out articles that's first revision was after some date.
@@ -194,13 +222,26 @@ And we need to recalculate percents to be windows of 5 years. So percent of the 
 
 ```{r}
 ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_point(size = 1.3) + scale_color_gradient2(midpoint = 7000000)
+
+ggsave('img-other/why-throwout-articles-after-first-revision-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ```
 
 Okay so we need to remove articles that were first revised after 5 years before last date (2008-01) on the date with the original counts, not percentages
 ```{r}
 filtered_revisions_counts <- collapsed[collapsed$article_id %in% t.first.before2003$article_id, ]
 arrange(filtered_revisions_counts, article_id)
+
 ggplot(data = filtered_revisions_counts, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + scale_color_gradient2(midpoint = 7000000)
+
+ggsave('img-other/filtered-revision-counts-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
 ```
 
 Okay. Now we want need to convert date to months since creations (so we can cap off the first 5 years).
@@ -212,6 +253,13 @@ aligned_revisions_counts$time.since.creation <- round((as.yearmon(aligned_revisi
 
 library(scales)
 ggplot(data = aligned_revisions_counts, aes(x=time.since.creation/12, y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_point() + xlab("Years since First Revision")
+
+ggsave('img-other/articles-months-since-first-revision-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+
 ```
 This is really interesting that smaller article_ids (older articles?) were heavily edited around 4-6 years after first creation.
 Okay now we need to convert to wide format.
@@ -229,6 +277,13 @@ df1_counts <- melt(all_months_counts, "article_id")
 df1_counts$variable <- as.integer(df1_counts$variable)
 
 ggplot(data = df1_counts, aes(x=variable, y = value, colour = article_id)) + geom_line(aes(group = article_id))
+
+ggsave('img-other/articles-months-since-first-revision-melted-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+
 ```
 Okay. So since the cut-off date was 2003-01, then the maximum amount of time for revisions is 5 years. Thus we should cut off all the data after 60 months since first revision. Then convert the values to percentages of all revisions.
 ```{r}
@@ -240,6 +295,13 @@ df1_5yrs <- melt(data_5yrs_norm, c("article_id", "totalrevisions"))
 df1_5yrs$variable <- as.integer(df1_5yrs$variable)
 
 ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=totalrevisions), size = 0.4) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision")
+
+ggsave('img-other/articles-normalized-by-total-5years-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+
+
 ```
 
 I want to discretize the number of total revisions
@@ -248,18 +310,43 @@ data_5yrs_norm$bins <- cut(data_5yrs_norm$totalrevisions, breaks=c(0,2,10,25,100
 
 df1_5yrs <- melt(data_5yrs_norm, c("article_id", "totalrevisions", "bins"))
 df1_5yrs$variable <- as.integer(df1_5yrs$variable)
+```
 
+```{r}
 ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=bins, alpha = 0.5), size = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + facet_grid(~bins) +  theme(legend.position="none")
 
+ggsave('img-other/articles-normalized-by-total-5years-facet-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+```
+
+```{r}
 ggplot(data = df1_5yrs, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=bins, alpha = 0.4), size = 0.5) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + scale_color_hue(direction = -1) + labs(color = "Total Article Revisions")
 
+ggsave('img-other/articles-normalized-by-total-5years-faceted-subsample1.png',
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+```
+
+
+```{r}
 factorlevels <- levels(df1_5yrs$bins)
 colorsused <- scales::hue_pal(direction = -1)(length(factorlevels))
 counter <- 1
+
 for (f in factorlevels){
   print(ggplot(data = df1_5yrs[df1_5yrs$bins == f,], aes(x=variable, y = value)) + geom_line(aes(group = article_id), color=colorsused[counter], size = 0.6, alpha = 0.5) + scale_y_continuous(labels = scales::percent, limits = c(0,1)) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + facet_grid(~bins) + theme(legend.position="none") )
   counter <- counter +1
+  
+  ggsave(paste0("img-other/articles-normalized-by-total-5years-facet-", f, "-subsample1.png"),
+       plot = last_plot(),
+       width = 10,
+       height = 6)
 }
+
+
 ```
 
 What's happening with articles that have over 500 revisions
@@ -270,6 +357,12 @@ counter <- 1
 for (f in factorlevels){
   print(ggplot(data = df1_5yrs[df1_5yrs$bins == f,], aes(x=variable, y = value)) + geom_line(aes(group = article_id), color=colorsused[counter], size = 0.6, alpha = 0.5) + scale_y_continuous(labels = scales::percent, limits = c(0,1)) + ylab("Percent of Article Revisions") + xlab("Months since First Revision") + facet_grid(~bins) + theme(legend.position="none") )
   counter <- counter +1
+  
+  ggsave(paste0("img-other/articles-normalized-by-total-5years-facet-over500revis-", f, "-subsample1.png"),
+       plot = last_plot(),
+       width = 10,
+       height = 6)
+  
 }
 ```
 
