@@ -27,8 +27,8 @@ See [this](https://github.com/xiaotaichai/Wikipedia-Edits-Distributed-Computing)
   * repeat steps above for entire dataset instead of sample  
    
 # Utilize External Data Sources   
-### Web Scraping Wikipedia for Indicators  
-See `/wikiscraper` folder  
+* Web Scraping Wikipedia for Indicators  
+ * See `/wikiscraper` folder  
 
 # Analysis  
 See this repo:  
