@@ -1,5 +1,6 @@
 ---
 title: "Analyzing 1000 Randomly Sampled Article IDs and their Associated Revisons"
+subtitle: "Distributed Computing"
 date: "March 29, 2018"
 output: html_document
 ---
@@ -68,7 +69,7 @@ str(df3)
 
 ## Date work
 Separate the date, create monthly counts
-```{r}
+```{r, results='hide'}
 date_split <- separate(data = revisions_processed, col = date, into = c('year', 'month', 'day'), sep = "-")
 monthlycounts <- date_split %>%
   group_by(article_id, year, month) %>%
@@ -83,7 +84,8 @@ str(revisions_to_dates)
 
 ```{r}
 revisions_to_dates$date <- format(revisions_to_dates$date, format="%Y-%m")
-revisions_to_dates
+
+head(revisions_to_dates)
 
 collapsed <- revisions_to_dates %>%
   group_by(article_id, date) %>%
@@ -143,7 +145,7 @@ ggsave('img/article-revisions-normalized-by-month-sample1.png',
 Plot this with first revision to get plot to prove our point about article ids and article age.
 Looks like articles that were created after 2006, might not have had time to show true trends of the lifecycle of the article. Let's only look at records that were first edited before 2006.
 
-```{r}
+```{r, results='hide'}
 # this won't work if the data isn't sorted by date
 # date of first revision for each article id
 
@@ -156,10 +158,12 @@ arrange(t.first.before2003, desc(date))
 
 So now we know which article_id's were created before 2003.
 We need to subset the data for these article_ids
-```{r}
+```{r,results='hide'}
 filtered_revisions <- percents[percents$article_id %in% t.first.before2003$article_id, ]
 arrange(filtered_revisions, article_id)
+```
 
+```{r}
 ggplot(data = filtered_revisions, aes(x=as.yearmon(date), y = percent, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + geom_point()
 
 ggsave('img-other/articles-normalized-by-total-subsample1.png',
@@ -199,7 +203,7 @@ Okay so there might be some trends that are obfuscated because we do not have 0%
 library(data.table)
 all_months <- as.data.frame(dcast(setDT(aligned_revisions), article_id ~ time.since.creation, value.var='percent'))
 all_months[is.na(all_months)] <- 0
-all_months
+head(all_months)
 
 library(reshape2)
 library(ggvis)
@@ -230,10 +234,12 @@ ggsave('img-other/why-throwout-articles-after-first-revision-subsample1.png',
 ```
 
 Okay so we need to remove articles that were first revised after 5 years before last date (2008-01) on the date with the original counts, not percentages
-```{r}
+```{r, results='hide'}
 filtered_revisions_counts <- collapsed[collapsed$article_id %in% t.first.before2003$article_id, ]
 arrange(filtered_revisions_counts, article_id)
+```
 
+```{r}
 ggplot(data = filtered_revisions_counts, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + scale_color_gradient2(midpoint = 7000000)
 
 ggsave('img-other/filtered-revision-counts-subsample1.png',

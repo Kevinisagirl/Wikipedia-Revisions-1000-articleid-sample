@@ -1,6 +1,6 @@
 ---
 title: "Analyzing 1000 Older Article Revisions"
-author: "Kevin"
+subtitle: "Distributed Computing"
 date: "March 29, 2018"
 output: html_document
 ---
