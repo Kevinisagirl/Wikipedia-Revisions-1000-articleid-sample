@@ -1,5 +1,5 @@
 ---
-title: "Analyzing 1000 Older Article Revisions"
+title: "Analyzing 1000 Randomly Sampled Article IDs From 2001-2005 and their Corresponding Revisions"
 subtitle: "Distributed Computing"
 date: "March 29, 2018"
 output: html_document
@@ -41,20 +41,21 @@ write(article.ids, file = "data/1000articleids.txt")
 
 ## Date work
 Separate the date, create monthly counts
-```{r}
+```{r, results='hide'}
 date_split <- separate(data = revisions_processed, col = date, into = c('year', 'month', 'day'), sep = "-")
 monthlycounts <- date_split %>%
   group_by(article_id, year, month) %>%
   dplyr::summarise(count = n())
 arrange(monthlycounts, article_id, year, month)
 ```
+
 ```{r}
 revisions_to_dates <- revisions_processed
 revisions_to_dates$date <- as.Date(revisions_to_dates$date, '%Y-%m-%d')
 str(revisions_to_dates)
 ```
 
-```{r}
+```{r, results='hide'}
 revisions_to_dates$date <- format(revisions_to_dates$date, format="%Y-%m")
 revisions_to_dates
 
@@ -62,7 +63,9 @@ collapsed <- revisions_to_dates %>%
   group_by(article_id, date) %>%
   dplyr::summarise(count = n())
 arrange(collapsed, desc(count))
+```
 
+```{r}
 library(zoo)
 library(scales)
 article.revisions.by.year.date <- ggplot(data = collapsed, aes(x=as.yearmon(date), y = count, colour = article_id)) + 
@@ -141,13 +144,14 @@ ggsave("img/high-revisions-per-month-articles.png", high.revisions.per.month.art
 61322 = Alcibiades
 
 Let's get finer granularity in the dates
-```{r}
+```{r, results='hide'}
 highest.collapsed.by.day <- revisions_processed[which(revisions_processed$article_id %in% popular.month.articles),] %>%
   group_by(article_id, date) %>%
   summarise(count = n())
 arrange(highest.collapsed.by.day, desc(count))
+```
 
-
+```{r}
 highest.collapsed.by.day$article_id[highest.collapsed.by.day$article_id == 25431] <- "Russian language"
 highest.collapsed.by.day$article_id[highest.collapsed.by.day$article_id == 60341] <- "Richmond, California"
 highest.collapsed.by.day$article_id[highest.collapsed.by.day$article_id == 61322] <- "Alcibiades"
@@ -186,7 +190,7 @@ ggplot(data = percents, aes(x=as.yearmon(date), y = percent, colour = article_id
 Plot this with first revision to get plot to prove our point about article ids and article age.
 
 In order to align the data to the left, we need to convert the dates to time since first revision. 
-```{r}
+```{r, results='hide'}
 # this won't work if the data isn't sorted by date
 # date of first revision for each article id
 t.first <- percents[!duplicated(percents$article_id),]
@@ -233,11 +237,13 @@ ggsave('img-older/article-revisions-by-month-since-creation-sample2.png',
 Note* we now have 0 in for articles that couldn't have existed that long. So we need to trim the end off.
 And we need to recalculate percents to be windows of 5 years. So percent of the revisions that occur in the first five years.
 
-```{r}
+```{r, results='hide'}
 filtered_revisions_counts <- collapsed
 arrange(filtered_revisions_counts, article_id)
-ggplot(data = filtered_revisions_counts, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + scale_color_gradient2(midpoint = 7000000)
+```
 
+```{r}
+ggplot(data = filtered_revisions_counts, aes(x=as.yearmon(date), y = count, colour = article_id)) + geom_line(aes(group = article_id)) + geom_vline(xintercept = as.yearmon("2003-01"), colour = "red") + scale_color_gradient2(midpoint = 7000000)
 ggsave('img-older/article-revisions-filtered-5years-sample2.png', 
        plot = last_plot(),
        width = 10,
@@ -573,14 +579,15 @@ articleids.10.2002 <- unique(articles.10.2002$article_id)
 ```
 
 
-```{r}
+```{r, results='hide'}
 
 collapsed.by.day <- revisions_processed[which(revisions_processed$article_id %in% articleids.10.2002),] %>%
   group_by(date) %>%
   summarise(count = n(), unique.articles = length(unique(article_id)))
 arrange(collapsed.by.day, desc(count))
-head(collapsed.by.day)
-
+head(collapsed.by.day,3)
+```
+```{r}
 library(zoo)
 # USE THIS - add legend, title
 ggplot(data = collapsed.by.day, aes(x=as.Date(date))) + geom_line(aes(y = count), color = "blue") + geom_line(aes(y=unique.articles), color = "lightblue")
@@ -588,7 +595,7 @@ ggplot(data = collapsed.by.day, aes(x=as.Date(date))) + geom_line(aes(y = count)
 ```
 These are articles that were first revised in October of 2002. Blue is the number of article revisions by day (each point is a single day). We see there are many revisions shortly after, and then again around 2 years later. There are 337 articles in this dataset that were first revised in Oct of 2002. The black is the number of unique articles revised. When black is as high as blue, the revisions for that date are all on unique articles. When black is lower than blue, there were multiple revisions on single articles for that date. So ~105 of the 337 article first revised on Oct 2002 were also edited around a single time ~ 2 yrs later. 
 
-```{r}
+```{r, results='hide'}
 arrange(collapsed.by.day, desc(count))
 
 authors.question <- revisions_processed[which(revisions_processed$article_id %in% articleids.10.2002),] %>%
@@ -600,7 +607,7 @@ arrange(authors.question, desc(count))
 
 ## categories
 
-```{r}
+```{r, results='hide'}
 categories <- do.call(rbind,strsplit(readLines("data/1000categories.txt"), "\x1e"))
 categories <- as.data.frame(categories)
 names(categories) <- c("article_id", "category")
@@ -616,7 +623,7 @@ These are not going to be very helpful. Wikipedia category hierarchy is complex 
 We need to pull all article categories and then we can pull all articles in particular high ranking categories like living people vs not living people, technology vs history etc.
 
 # Article Tags
-```{r}
+```{r, results='hide'}
 tags <- as.data.frame(do.call(rbind,strsplit(readLines("data/all_oldenough_indicators.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
 tags$V2 <- as.factor(tags$V2)
 wikinames <- levels(tags$V2)
@@ -630,8 +637,9 @@ arrange(tags, article_id)
 data.with.indicators <- merge(tags, df1_5yrs, by='article_id', all=TRUE, sort=FALSE)
 data.with.indicators <- data.with.indicators[!is.na(data.with.indicators$first),]
 arrange(data.with.indicators,article_id,quarter)
+```
 
-
+```{r}
 # Plot percents by tags
 ggplot(data = data.with.indicators, aes(x=variable, y = value)) + geom_line(aes(group = article_id, color=Indicator), size = 0.4, alpha = 0.2) + scale_y_continuous(labels = scales::percent) + ylab("Percent of Article Revisions") + xlab("Months since First Revision")
 
@@ -725,7 +733,7 @@ ggsave('img-older/living-people-top-points-sample2.png',
 ```
 
 Who is that super popular living person?
-```{r}
+```{r, results='hide'}
 popularperson <- as.integer(unique(living.people.indicator[which(!is.na(living.people.indicator$LivingPerson) & living.people.indicator$count > 100),"article_id"]))
 # 162864 is Lauryn Hill https://en.wikipedia.org/?curid=162864
 popularpeople <- living.people.indicator %>%
@@ -733,8 +741,12 @@ popularpeople <- living.people.indicator %>%
   group_by(article_id) %>%
   dplyr::summarize(totalrevisions = sum(count)) %>%
   arrange(desc(totalrevisions))
-popularpeople
 ```
+
+```{r}
+head(popularpeople)
+```
+
 
 Are articles deleted?
 Is there a trend in articles that don't have categories?
@@ -752,7 +764,7 @@ no.categories.articles <- collapsed %>%
 # this produces only the article 1073, but looking through browser shows that this article is a "bad title"
 # this was fixed in the above code
 ```
-```{r}
+```{r, results='hide'}
 allcategories <- as.data.frame(do.call(rbind,strsplit(readLines("data/Categories_all_oldenough.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
 allcategories <- as.data.frame(allcategories)
 names(allcategories) <- c("article_id", "category")
@@ -761,7 +773,7 @@ all.cat.unique.counts <- allcategories %>%
   dplyr::summarize(count = n())
 arrange(all.cat.unique.counts, desc(count))
 ```
-```{r}
+```{r, results='hide'}
 manually.all.cat.unique.counts <- all.cat.unique.counts
 manually.all.cat.unique.counts$manual.category <- manually.all.cat.unique.counts$category
 geo.list <- c("Cities", "Townships", "Towns in", "Villages in", "places in", "cities", "towns", "Counties", "metropolitan area", "counties", "Municipalities of", "Member states", "Areas of", "metroplex", "Populated places")
