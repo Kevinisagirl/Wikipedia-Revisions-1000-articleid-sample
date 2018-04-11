@@ -36,7 +36,7 @@ head(revisions_processed)
 
 article.ids <- unique(revisions_processed$article_id)
 # save these to a file for the webscraper
-write(article.ids, file = "1000articleids.txt")
+write(article.ids, file = "data/1000articleids.txt")
 ```
 
 ## Date work
@@ -601,7 +601,7 @@ arrange(authors.question, desc(count))
 ## categories
 
 ```{r}
-categories <- do.call(rbind,strsplit(readLines("1000categories.txt"), "\x1e"))
+categories <- do.call(rbind,strsplit(readLines("data/1000categories.txt"), "\x1e"))
 categories <- as.data.frame(categories)
 names(categories) <- c("article_id", "category")
 cat.unique.counts <- categories %>%
@@ -617,7 +617,7 @@ We need to pull all article categories and then we can pull all articles in part
 
 # Article Tags
 ```{r}
-tags <- as.data.frame(do.call(rbind,strsplit(readLines("all_oldenough_indicators.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
+tags <- as.data.frame(do.call(rbind,strsplit(readLines("data/all_oldenough_indicators.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
 tags$V2 <- as.factor(tags$V2)
 wikinames <- levels(tags$V2)
 replacement.names <- c("Featured Article", "Good Article", "Journal", "Help Link", "Partially Protected - Autoreview", "Partially Protected - Default", "Spoken")
@@ -753,7 +753,7 @@ no.categories.articles <- collapsed %>%
 # this was fixed in the above code
 ```
 ```{r}
-allcategories <- as.data.frame(do.call(rbind,strsplit(readLines("Categories_all_oldenough.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
+allcategories <- as.data.frame(do.call(rbind,strsplit(readLines("data/Categories_all_oldenough.txt"), "\x1e",fixed=T)), stringsAsFactors = FALSE)
 allcategories <- as.data.frame(allcategories)
 names(allcategories) <- c("article_id", "category")
 all.cat.unique.counts <- allcategories %>%

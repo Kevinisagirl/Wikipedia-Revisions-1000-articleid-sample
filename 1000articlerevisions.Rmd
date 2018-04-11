@@ -1,6 +1,5 @@
 ---
-title: "Untitled"
-author: "Kevin Hunt"
+title: "Analyzing 1000 Randomly Sampled Article IDs and their Associated Revisons"
 date: "March 29, 2018"
 output: html_document
 ---
@@ -13,7 +12,7 @@ library(scales)
 
 load in the data and convert to a data frame
 ```{r}
-revisions <- do.call(rbind,strsplit(readLines("all_revisions_1000_articles.txt"), "<<sep>>",fixed=T))
+revisions <- do.call(rbind,strsplit(readLines("data/all_revisions_1000_articles.txt"), "<<sep>>",fixed=T))
 head(revisions)
 
 revisions_processed <- 
