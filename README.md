@@ -21,6 +21,9 @@ initial random subsample of 1000 article ids - `1000revisions.rmd`
 
 subsample of 1000 older article ids - `1000olderrevisons.rmd`  
 
+Monthly Timeline
+https://rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/master/MonthlyTimeline/monthly_timeline.html
+
 # Presentation 
 
 See slides here:  
