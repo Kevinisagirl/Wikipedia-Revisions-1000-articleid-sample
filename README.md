@@ -35,7 +35,7 @@ See [this](https://github.com/xiaotaichai/Wikipedia-Edits-Distributed-Computing)
   * see rmd file [here](https://github.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/blob/master/1000articlerevisions.Rmd)
 
 * Analyze & visualize new subsample of 1000 older unique article ids (pre-2005) and the revisions associated with each unique id  
-  * see rmd file [here](https://cdn.rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/faaee07b/1000olderarticlerevisions.html)
+  * see rmd file [here](https://cdn.rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/2511b394/1000olderarticlerevisions.html)
 
 * Scale data analysis to entire data set  
  * Create [interactive visualization](https://cdn.rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/576287ed/MonthlyTimeline/monthly_timeline.html) monthly timeline for all revisions  
