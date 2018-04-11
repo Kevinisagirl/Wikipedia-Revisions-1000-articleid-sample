@@ -32,11 +32,14 @@ See [this](https://github.com/xiaotaichai/Wikipedia-Edits-Distributed-Computing)
 
 # Analysis   
 * Analyze & visualize initial random subsample of 1000 unique article ids and the revisions associated with each unique id  
+  * see rmd file [here](https://github.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/blob/master/1000articlerevisions.Rmd)
 
 * Analyze & visualize new subsample of 1000 older unique article ids (pre-2005) and the revisions associated with each unique id  
+  * see rmd file [here](https://cdn.rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/faaee07b/1000olderarticlerevisions.html)
 
 * Scale data analysis to entire data set  
  * Create [interactive visualization](https://rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/master/MonthlyTimeline/monthly_timeline.html) monthly timeline for all revisions  
+   * See `/MonthlyTimeline folder   
  * Generate word clouds for most popular article revisions per year  
    * See `/wikiscraper` folder   
  
