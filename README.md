@@ -28,16 +28,19 @@ See [this](https://github.com/xiaotaichai/Wikipedia-Edits-Distributed-Computing)
    
 # Utilize External Data Sources   
 * Web Scraping Wikipedia for Indicators  
- * See `/wikiscraper` folder  
+  * See `/wikiscraper` folder  
 
-# Analysis  
-See this repo:  
-initial random subsample of 1000 article ids - `1000revisions.rmd`
+# Analysis   
+* Analyzing initial random subsample of 1000 unique article ids and the revisions associated with each unique id  
 
-subsample of 1000 older article ids - `1000olderrevisons.rmd`  
+* Analyze new subsample of 1000 older unique article ids (pre-2005) and the revisions associated with each unique id  
 
-Monthly Timeline
-https://rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/master/MonthlyTimeline/monthly_timeline.html
+* Scale data analysis to entire data set  
+ * [Visualize](https://rawgit.com/Kevinisagirl/Wikipedia-Revisions-1000-articleid-sample/master/MonthlyTimeline/monthly_timeline.html monthly timeline for all revisions)  
+ * Generate word clouds for most popular article revisions per year  
+   * See `/wikiscraper` folder   
+ 
+
 
 
 # Presentation  
