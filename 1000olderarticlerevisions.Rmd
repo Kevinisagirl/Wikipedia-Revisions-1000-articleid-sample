@@ -1,6 +1,6 @@
 ---
-title: "Untitled"
-author: "Kevin Hunt"
+title: "Analyzing 1000 Older Article Revisions"
+author: "Kevin"
 date: "March 29, 2018"
 output: html_document
 ---
@@ -17,7 +17,7 @@ library(zoo)
 
 load in the data and convert to a data frame
 ```{r}
-revisions <- read.table(file = "articlesthatareoldenough.txt", sep = ",", quote = "\"'", stringsAsFactors = FALSE, header = FALSE, strip.white = TRUE)
+revisions <- read.table(file = "data/articlesthatareoldenough.txt", sep = ",", quote = "\"'", stringsAsFactors = FALSE, header = FALSE, strip.white = TRUE)
 remove.list <- list('\\[', '\\]')
 revisions <- lapply(revisions, gsub, pattern = paste(unlist(remove.list), collapse = "|") , replacement = '')
 revisions <- as.data.frame(revisions, stringsAsFactors = FALSE)
@@ -678,7 +678,7 @@ It's pretty clear that article's with tags are more popular for revisions.
 
 Let's look at which articles have been deleted.
 ```{r}
-deleted.articles <- read.csv("badtitles1000sample.txt")
+deleted.articles <- read.csv("data/badtitles1000sample.txt")
 deleted.articles <- deleted.articles[,1]
 data.count.indicators$Indicator <- as.character(data.count.indicators$Indicator)
 data.count.indicators[which(data.count.indicators$article_id %in% deleted.articles), "Indicator"] <- "Deleted Article IDs"
