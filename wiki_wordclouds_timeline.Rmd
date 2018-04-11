@@ -1,0 +1,200 @@
+---
+title: "Visualizations of Revision Timelines for Wikipedia Articles"
+author: "Lydia LaSeur"
+date: "4/7/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(data.table)
+library(stringr)
+library(zoo)
+library(directlabels)
+library(tidyverse)
+```
+Read in the data from csv into data frame
+```{r}
+dt_raw <- fread('timelines_5yrs_long.csv', header = TRUE, sep = ',', stringsAsFactors = FALSE)
+str(dt_raw)
+```
+Get total number of revisions for each article and assign factor that bins by number of revisions.
+```{r}
+total_counts <- dt_raw %>%
+  group_by(article_id) %>%
+  summarise(total = n())
+total_counts$num_revisions_level <-  cut(total_counts$total, breaks=c(0,2,10,25,100, 500, max(total_counts$total)), labels=c("1-2", "3-10", "10-25", "25-100", "100-500", "500-"))
+
+dt <- inner_join(dt_raw,total_counts,by = "article_id")
+
+str(dt)
+```
+
+
+Create data dictionary that maps article id to the article name and cleans up the formatting for article name.
+```{r}
+article_ids_names <- dt %>%
+  select(article_id,article_name) %>%
+  group_by(article_id, article_name) %>%
+  summarise(id = unique(article_id), name = unique(article_name))
+article_ids_names <- article_ids_names[,c("article_id","article_name")]
+
+pretty_names <- gsub("_", " ", article_ids_names$article_name)
+article_ids_names$article_name <- pretty_names
+```
+
+Count number of revisions for each user name.
+```{r}
+author_counts <- dt %>%
+  group_by(user_name) %>%
+  summarise(num_rev = n()) %>%
+  arrange(desc(num_rev))
+head(author_counts)
+```
+
+Get dates for each revision using the creation datetime and the days_since_creation variable
+```{r}
+dt$creation_datetime <- strptime(dt$creation_datetime,format = "%Y-%m-%d %H:%M:%S")
+dt$year <- format(dt$creation_datetime + (dt$days_since_creation * 24 * 60 * 60), format = "%Y")
+dt$year_month <- format(dt$creation_datetime + (dt$days_since_creation * 24 * 60 * 60), format = "%Y-%m")
+dt$year_month_day <- format(dt$creation_datetime + (dt$days_since_creation * 24 * 60 * 60), format = "%Y-%m-%d")
+str(dt)
+```
+Get counts of revisions made for each article for each month from Jan 2001 to Dec 2007
+```{r}
+monthly_cts <- dt %>%
+  select(article_id,year_month,num_revisions_level,total) %>%
+  group_by(article_id, year_month) %>%
+  summarise(count = n())
+monthly_cts <- inner_join(monthly_cts, article_ids_names, by = "article_id")
+head(monthly_cts)
+```
+Do the same but count revisions made for each day from Jan 1 2001 to Dec 31 2007.  
+```{r}
+daily_cts <- dt %>%
+  select(article_id,year_month_day,num_revisions_level,total) %>%
+  group_by(article_id, year_month_day) %>%
+  summarise(count = n())
+daily_cts <- inner_join(daily_cts, article_ids_names, by = "article_id")
+head(daily_cts)
+```
+
+Get top 1000 articles by number of total revisions.  
+```{r}
+n <- 1000
+
+top_total <- (total_counts %>% arrange(desc(total)))[c(1:n),]
+top_total <- inner_join(top_total, article_ids_names, by = "article_id")
+
+```
+
+For each month, what was the most revised article.  
+```{r}
+top_per_month <- monthly_cts %>%
+  group_by(year_month) %>%
+  summarise(num_revisions = max(count), article_id = article_id[which.max(count)]) 
+
+top_per_month <- inner_join(top_per_month, article_ids_names, by = "article_id")
+```
+
+For each day, what was the most revised article.  
+```{r}
+
+top_per_day <- daily_cts %>%
+  group_by(year_month_day) %>%
+  summarise(num_revisions = max(count), article_id = article_id[which.max(count)]) 
+
+top_per_day <- inner_join(top_per_day, article_ids_names, by = "article_id")
+```
+
+Show above tables using pretty formatting and only pertinent fields.   
+```{r}
+options(knitr.table.format = 'html')
+top_total_table <- top_total %>%
+  select(article_name, total) %>%
+  kable("html") %>%
+  kable_styling()
+
+top_total_table
+
+top_monthly_table <- top_per_day %>%
+  select(article_name, year_month, num_revisions) %>%
+  kable("html") %>%
+  kable_styling()
+
+top_monthly_table
+
+top_daily_table <- top_per_day %>%
+  select(article_name, year_month_day, num_revisions) %>%
+  kable("html") %>%
+  kable_styling()
+
+top_daily_table
+```
+
+Create interactive monthly time with top article for each month as the "events"  
+```{r}
+library(timevis)
+library(htmlwidgets)
+monthly_timeline_viz_df <- data <- data.frame(
+  id      = 1:nrow(top_per_month),
+  content = top_per_month$article_name,
+  start   = top_per_month$year_month,
+  end     = rep(NA, nrow(top_per_month))
+)
+
+monthly_timeline <- timevis(monthly_timeline_viz_df, options = list(zoomable = TRUE, horizontalScroll = TRUE, min = "2000-12", max = "2008-02", maxHeight = 300, minheight = 200, zoomMin = 1.5e10, zoomMax = 2.5e11))
+monthly_timeline
+saveWidget(monthly_timeline, file = "monthly_timeline.html", selfcontained = FALSE)
+```
+Try to do a word cloud of the top article per day
+```{r}
+library(tm)
+library(SnowballC)
+library(wordcloud)
+
+
+top_daily_article_corpus <- Corpus(VectorSource(top_per_day$article_name))
+top_daily_article_corpus <- tm_map(top_daily_article_corpus, removeWords, stopwords("english"))
+dtm <- TermDocumentMatrix(top_daily_article_corpus)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d$word <- as.character(d$word)
+str(d)
+sum(d$word == "the")
+d <- d[!(d$word == "the"),]
+wordcloud(words = d$word, freq = d$freq, scale=c(3,.75), min.freq = 2, random.order = FALSE ,colors=brewer.pal(8, "Dark2"), max.words = 200)
+
+
+```
+Generate word cloud for each year (2001-2007)
+```{r}
+top_per_day_2001 <- top_per_day[grep(pattern = "^2002-.+?", top_per_day$year_month_day), ]
+top_per_day_2001
+
+daily_top_per_year_wordcloud <- function(year, df) {
+  date_pattern <- sprintf("^%d.+?", year)
+  year_subset <- df[grep(pattern = date_pattern, df$year_month_day), ]
+  article_name_corpus <- Corpus(VectorSource(year_subset$article_name))
+  article_name_corpus <- tm_map(article_name_corpus, removeWords, stopwords("english"))
+  # article_name_corpus
+  dtm <- TermDocumentMatrix(article_name_corpus)
+  m <- as.matrix(dtm)
+  v <- sort(rowSums(m),decreasing=TRUE)
+  d <- data.frame(word = names(v),freq=v)
+  d$word <- as.character(d$word)
+  d <- d[!(d$word == "the"),]
+  wordcloud(words = d$word, freq = d$freq, scale=c(4,.5), min.freq = 2, random.order = FALSE ,colors=brewer.pal(8, "Dark2"), max.words = 100)
+}
+
+daily_top_per_year_wordcloud(2001, top_per_day)
+daily_top_per_year_wordcloud(2002, top_per_day)
+daily_top_per_year_wordcloud(2003, top_per_day)
+daily_top_per_year_wordcloud(2004, top_per_day)
+daily_top_per_year_wordcloud(2005, top_per_day)
+daily_top_per_year_wordcloud(2006, top_per_day)
+daily_top_per_year_wordcloud(2007, top_per_day)
+```
+
