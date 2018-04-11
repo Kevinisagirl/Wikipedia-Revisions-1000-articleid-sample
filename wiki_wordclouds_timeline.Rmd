@@ -7,15 +7,16 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
+library(knitr)
+library(kableExtra)
 library(data.table)
 library(stringr)
-library(zoo)
-library(directlabels)
 library(tidyverse)
 ```
 Read in the data from csv into data frame
 ```{r}
+# NOTE: This csv was pretty large and we didn't push it to GitHub. Let us know if you would like to run any of this using that file and we can get it you.
+
 dt_raw <- fread('timelines_5yrs_long.csv', header = TRUE, sep = ',', stringsAsFactors = FALSE)
 str(dt_raw)
 ```
@@ -114,21 +115,24 @@ options(knitr.table.format = 'html')
 top_total_table <- top_total %>%
   select(article_name, total) %>%
   kable("html") %>%
-  kable_styling()
+  kable_styling() %>%
+  scroll_box(height = "500px")
 
 top_total_table
 
-top_monthly_table <- top_per_day %>%
+top_monthly_table <- top_per_month %>%
   select(article_name, year_month, num_revisions) %>%
   kable("html") %>%
-  kable_styling()
+  kable_styling()  %>%
+  scroll_box(height = "500px")
 
 top_monthly_table
 
 top_daily_table <- top_per_day %>%
   select(article_name, year_month_day, num_revisions) %>%
   kable("html") %>%
-  kable_styling()
+  kable_styling()  %>%
+  scroll_box(height = "500px")
 
 top_daily_table
 ```
@@ -165,7 +169,8 @@ d$word <- as.character(d$word)
 str(d)
 sum(d$word == "the")
 d <- d[!(d$word == "the"),]
-wordcloud(words = d$word, freq = d$freq, scale=c(3,.75), min.freq = 2, random.order = FALSE ,colors=brewer.pal(8, "Dark2"), max.words = 200)
+
+invisible(wordcloud(words = d$word, freq = d$freq, scale=c(3,.75), min.freq = 2, random.order = FALSE ,colors=brewer.pal(8, "Dark2"), max.words = 200))
 
 
 ```
@@ -186,15 +191,15 @@ daily_top_per_year_wordcloud <- function(year, df) {
   d <- data.frame(word = names(v),freq=v)
   d$word <- as.character(d$word)
   d <- d[!(d$word == "the"),]
-  wordcloud(words = d$word, freq = d$freq, scale=c(4,.5), min.freq = 2, random.order = FALSE ,colors=brewer.pal(8, "Dark2"), max.words = 100)
+  invisible(wordcloud(words = d$word, freq = d$freq, scale=c(4,.5), min.freq = 2, random.order = FALSE ,colors=brewer.pal(8, "Dark2"), max.words = 100))
 }
 
 daily_top_per_year_wordcloud(2001, top_per_day)
-daily_top_per_year_wordcloud(2002, top_per_day)
-daily_top_per_year_wordcloud(2003, top_per_day)
-daily_top_per_year_wordcloud(2004, top_per_day)
-daily_top_per_year_wordcloud(2005, top_per_day)
-daily_top_per_year_wordcloud(2006, top_per_day)
-daily_top_per_year_wordcloud(2007, top_per_day)
+daily_top_per_year_wordcloud(2001, top_per_day)
+daily_top_per_year_wordcloud(2001, top_per_day)
+daily_top_per_year_wordcloud(2001, top_per_day)
+daily_top_per_year_wordcloud(2001, top_per_day)
+daily_top_per_year_wordcloud(2001, top_per_day)
+daily_top_per_year_wordcloud(2001, top_per_day)
 ```
 
