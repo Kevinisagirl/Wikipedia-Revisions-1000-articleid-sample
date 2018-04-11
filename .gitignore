@@ -4,4 +4,4 @@
 .Ruserdata
 *.txt
 *.gz
-.DS_Store
+*.DS_Store
